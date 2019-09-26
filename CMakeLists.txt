@@ -1,0 +1,35 @@
+cmake_minimum_required(VERSION 2.8.7)
+project(image CXX C)
+
+option(build_gtest "Build gtest's programs." OFF)
+option(build_gbenchmark "Build gbenchmark's programs." OFF)
+
+include(cmake/internal_utils.cmake)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/External)
+
+enable_testing()
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+link_directories(${GTEST_LIBRARIES})
+find_package(Threads REQUIRED)
+find_package(BLAS REQUIRED)
+find_package(BENCHMARK REQUIRED)
+
+include_directories("include")
+cxx_library(image "${cxx_strict}" src/image.cc)
+#cxx_library(image_test "${cxx_strict}" test/image_unittest.cc)
+
+if (build_gtest)
+  cxx_executable(image_test test image test/image_unittest.cc)
+  target_link_libraries(image_test ${GTEST_LIBRARIES})
+  target_link_libraries(image_test ${BLAS_LIBRARIES})
+  target_link_libraries(image_test ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
+if (build_gbenchmark)
+  cxx_executable(image_benchmark benchmark image benchmark/image_benchmark.cc)
+  target_link_libraries(image_benchmark ${GTEST_LIBRARIES})
+  target_link_libraries(image_benchmark ${BLAS_LIBRARIES})
+  target_link_libraries(image_benchmark ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(image_benchmark ${CMAKE_THREAD_LIBS_INIT})
+endif()
